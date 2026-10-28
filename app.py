@@ -1,7 +1,7 @@
 import http.server
 import os
-
-PORT = int(os.environ.get("PORT", 8000))
+import threading
+import time
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
@@ -10,7 +10,26 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         super().end_headers()
 
 
-if __name__ == "__main__":
-    server = http.server.ThreadingHTTPServer(("0.0.0.0", PORT), Handler)
-    print(f"Serving on port {PORT}")
-    server.serve_forever()
+def serve(port):
+    try:
+        srv = http.server.ThreadingHTTPServer(("0.0.0.0", port), Handler)
+    except OSError:
+        print(f"Port {port} is busy, skipped")
+        return
+    print(f"Serving on port {port}")
+    srv.serve_forever()
+
+
+ports = set()
+for var in ("PORT", "WEB_PORT", "APP_PORT", "HTTP_PORT", "SERVER_PORT", "LISTEN_PORT"):
+    val = os.environ.get(var)
+    if val and val.isdigit():
+        ports.add(int(val))
+ports.update((8080, 8000, 3000, 5000, 80))
+
+for p in sorted(ports):
+    threading.Thread(target=serve, args=(p,), daemon=True).start()
+
+print(f"Listening on ports: {sorted(ports)}")
+while True:
+    time.sleep(3600)
