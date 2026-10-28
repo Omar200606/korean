@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f5fd">
 <title>Слушаем, как звучат корейские буквы и слова</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,7 +23,7 @@
   .blob-a{width:420px;height:420px;background:#dcd6ff;top:-140px;right:-120px;opacity:.7}
   .blob-b{width:380px;height:380px;background:#ffd9e8;bottom:-160px;left:-140px;opacity:.6}
 
-  .wrap{position:relative;z-index:1;max-width:660px;margin:0 auto;padding:56px 20px 72px}
+  .wrap{position:relative;z-index:1;max-width:660px;margin:0 auto;padding:56px 20px calc(72px + env(safe-area-inset-bottom,0px))}
 
   .hero{text-align:center;margin-bottom:40px}
   .kicker{
@@ -73,6 +74,7 @@
     display:grid;place-items:center;color:#fff;cursor:pointer;
     background:linear-gradient(135deg,#6366f1,#a855f7);
     box-shadow:0 8px 18px rgba(124,58,237,.35);
+    -webkit-tap-highlight-color:transparent;
     transition:transform .15s ease;
   }
   .btn:hover{transform:scale(1.06)}
@@ -81,7 +83,7 @@
   .btn svg{margin-left:2px}
   .btn.playing svg{margin-left:0}
 
-  .wave{display:flex;align-items:center;gap:3px;height:46px;flex:1;cursor:pointer;touch-action:none}
+  .wave{display:flex;align-items:center;gap:3px;height:46px;flex:1;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
   .wave span{flex:1;max-width:5px;min-width:2px;border-radius:99px;background:#dcdcef;transition:background .12s linear}
   .wave span.on{background:linear-gradient(180deg,#8b5cf6,#6366f1)}
 
@@ -90,11 +92,18 @@
 
   @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
   @media (prefers-reduced-motion:reduce){.card{animation:none;transition:none}}
+  @media (max-width:640px){.blob{filter:blur(60px);opacity:.55}}
   @media (max-width:480px){
     .wrap{padding-top:40px}
-    .card{padding:20px 18px}
+    .hero{margin-bottom:28px}
+    .card{padding:18px 16px}
+    .head{gap:12px;margin-bottom:14px}
     .player{gap:10px;padding:10px 12px}
+    .btn{width:50px;height:50px}
     .time{font-size:12px}
+  }
+  @media (max-width:400px){
+    .time .sep,.t-dur{display:none}
   }
 </style>
 </head>
@@ -160,8 +169,8 @@
     const cur=root.querySelector('.t-cur');
     const dur=root.querySelector('.t-dur');
 
-    // декоративная волна из полосок, своя у каждого плеера
-    const N=52, bars=[];
+    // декоративная волна из полосок, своя у каждого плеера; на узких экранах полосок меньше
+    const N=matchMedia('(max-width:520px)').matches?34:52, bars=[];
     for(let i=0;i<N;i++){
       const b=document.createElement('span');
       const h=18+74*Math.abs(Math.sin(i*.83+pi*1.7)*.55+Math.sin(i*2.17+pi)*.45);
